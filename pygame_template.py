@@ -55,7 +55,7 @@ while run:
 
     elif isJump:
         print(player.rect.y)
-        if player.rect.y <= 650:
+        if player.rect.y <= 680:
             player.rect.y = player.rect.y + player.jump
             player.jump = player.jump + 1
             if player.jump == 0:
@@ -64,7 +64,7 @@ while run:
         else:
             isJump = False
             player.jump = 0
-            player.rect.y = 650
+            player.rect.y = 680
             klick = 0
 
 

@@ -1,72 +1,79 @@
 import pygame
 from block import *
 
-
 WIDTH = 1550
 HEIGHT = 820
+vec = pygame.math.Vector2
 
-player_img = pygame.image.load("img\\hero.png")
 
 class Hero(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, _game):
         pygame.sprite.Sprite.__init__(self)
         self.scale_f = 3
         self.i_x = 180 * self.scale_f
         self.i_y = 104 * self.scale_f
-        self.image = player_img
+
+        self.game = _game
+
+        self.image = pygame.image.load("img\\hero.png")
         self.image = pygame.transform.scale(self.image, (64, 64))
-        self.rect = pygame.Rect(0, 0, 64, 80)
-        self.rect.topleft = (20, 716 - 210)
-        self.d_left = 0
-        self.d_right = 0
-        self.d_down = 0
-        self.gravity = 0
-        self.jump = 0
+
+        self.rect = pygame.Rect(0, 0, 64, 64)
+        self.rect.bottomleft = (20, 832 - 64)
+
+        self.image.fill(pygame.Color(255, 255, 255))
+
+        self.pos = vec(20, 832 - 64)
+        self.acc = vec(0, 0)
+        self.vel = vec(0, 0)
+
+        self.speed = 0.5
+        self.g_v = -0.12
+
+        self.jumps = 0
+
         self.is_moving = False
-        self.speed = 7
 
-    def stop_player(self, _key):
-        if _key == pygame.K_a:
-            self.d_left = 0
+    def check_collision(self):
+        self.rect.move_ip(self.vel)
 
-        if _key == pygame.K_d:
-            self.d_right = 0
+        hits = pygame.sprite.spritecollideany(self, self.game.test_group)
 
-        # if _key == pygame.K_SPACE:
-        #     self.jump = 0
+        if hits:
+            self.rect.move_ip(-self.vel)
+            self.vel.y = 0
+
+        return hits
+
+    def update(self):
+        ground = self.check_collision()
+
+        if ground:
+            self.rect.move(-self.vel)
+            self.pos = self.rect.midbottom
+            self.vel.y = 0
+
+    def jump(self):
+        if self.jumps < 2:
+            self.vel.y = -12
+            self.jumps += 1
+
+        if self.check_collision():
+            self.jumps = 0
 
     def move(self):
-         self.rect.x += self.d_right + self.d_left
-         self.rect.y += self.jump
-         self.i_x = 180 * self.scale_f
-         self.i_y = 104 * self.scale_f
+        self.acc = vec(0, 0.5)
 
+        pressed_keys = pygame.key.get_pressed()
 
+        if pressed_keys[pygame.K_LEFT] or pressed_keys[pygame.K_a]:
+            self.acc.x = -self.speed
 
-         if self.d_right + self.d_left != 0 and self.jump == 0:
-            self.is_moving = True
-         else:
-              self.is_moving = False
+        elif pressed_keys[pygame.K_RIGHT] or pressed_keys[pygame.K_d]:
+            self.acc.x = self.speed
 
+        self.acc.x += self.vel.x * self.g_v
+        self.vel += self.acc
+        self.pos += self.vel + 0.5 * self.acc
 
-
-
-    def move_player(self, _key):
-
-        if _key == pygame.K_a:
-            self.d_left = -1 * self.speed
-
-
-
-
-
-        if _key == pygame.K_d:
-            self.d_right = 1 * self.speed
-
-
-
-        if _key == pygame.K_SPACE:
-            self.jump = -17
-            self.is_moving = False
-
-
+        self.rect.midbottom = self.pos

@@ -21,14 +21,14 @@ class Hero(pygame.sprite.Sprite):
         self.rect = pygame.Rect(0, 0, 64, 64)
         self.rect.bottomleft = (20, 832 - 64)
 
-        self.image.fill(pygame.Color(255, 255, 255))
+        # self.image.fill(pygame.Color(255, 255, 255))
+
+        self.speed = 5
+        self.g_v = 0.12
 
         self.pos = vec(20, 832 - 64)
         self.acc = vec(0, 0)
         self.vel = vec(0, 0)
-
-        self.speed = 0.5
-        self.g_v = -0.12
 
         self.jumps = 0
 
@@ -37,7 +37,7 @@ class Hero(pygame.sprite.Sprite):
     def check_collision(self):
         self.rect.move_ip(self.vel)
 
-        hits = pygame.sprite.spritecollideany(self, self.game.test_group)
+        hits = pygame.sprite.spritecollide(self, self.game.test_group, False)
 
         if hits:
             self.rect.move_ip(-self.vel)
@@ -45,33 +45,70 @@ class Hero(pygame.sprite.Sprite):
         return hits
 
     def update(self):
-        ground = self.check_collision()
+        collision_type = {
+            'top': False, 'bottom': False, 'right': False, 'left': False
+        }
 
-        if ground:
-            self.rect.move(-self.vel)
-            self.pos = self.rect.midbottom
-            self.vel.y = 0
-            self.jumps = 0
-
-    def jump(self):
-        print(self.jumps)
-        if self.jumps < 2:
-            self.vel.y = -12
-            self.jumps += 1
-
-    def move(self):
-        self.acc = vec(0, 0.5)
+        self.vel = vec(0, self.vel.y)
 
         pressed_keys = pygame.key.get_pressed()
 
+        # LEFT RIGHT MOVE
         if pressed_keys[pygame.K_LEFT] or pressed_keys[pygame.K_a]:
-            self.acc.x = -self.speed
+            self.vel.x = -self.speed
 
-        elif pressed_keys[pygame.K_RIGHT] or pressed_keys[pygame.K_d]:
-            self.acc.x = self.speed
+        if pressed_keys[pygame.K_RIGHT] or pressed_keys[pygame.K_d]:
+            self.vel.x = self.speed
 
-        self.acc.x += self.vel.x * self.g_v
-        self.vel += self.acc
-        self.pos += self.vel + 0.5 * self.acc
+        self.rect.move(self.vel.x, 0)
 
-        self.rect.midbottom = self.pos
+        collisions = self.check_collision()
+
+        # LEFT RIGHT COLLISION
+        for block in collisions:
+            if self.vel.x > 0:
+                self.rect.right = block.rect.left
+                collision_type['right'] = True
+
+            elif self.vel.x < 0:
+                self.rect.left = block.rect.right
+                collision_type['left'] = True
+
+        if collision_type['right'] or collision_type['left']:
+            self.vel.x = 0
+
+        # JUMP MOVE
+        if pressed_keys[pygame.K_SPACE]:
+            self.jump()
+
+        self.rect.move(0, self.vel.y)
+
+        collisions = self.check_collision()
+
+        # JUMP COLLISION
+        for block in collisions:
+            if self.vel.y > 0:
+                self.rect.bottom = block.rect.top
+                collision_type['bottom'] = True
+
+                self.jumps = 0
+
+            elif self.vel.y < 0:
+                self.rect.top = block.rect.bottom
+                collision_type['top'] = True
+
+                self.jumps = 0
+
+        if collision_type['top'] or collision_type['bottom']:
+            self.vel.y = 0
+
+        self.vel.y += self.g_v
+        self.rect.move(0, self.vel.y)
+
+    def jump(self):
+        if self.jumps < 2:
+            self.vel.y = -6
+            self.jumps += 1
+
+    def move(self):
+        pass

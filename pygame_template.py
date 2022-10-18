@@ -59,10 +59,6 @@ class MorningRay:
                     if event.key == pygame.K_ESCAPE:
                         self.run = False
 
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE:
-                        self.player.jump()
-
             self.player.move()
 
             self.all_sprites.update()

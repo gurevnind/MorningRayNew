@@ -41,7 +41,6 @@ class Hero(pygame.sprite.Sprite):
 
         if hits:
             self.rect.move_ip(-self.vel)
-            self.vel.y = 0
 
         return hits
 
@@ -52,14 +51,13 @@ class Hero(pygame.sprite.Sprite):
             self.rect.move(-self.vel)
             self.pos = self.rect.midbottom
             self.vel.y = 0
+            self.jumps = 0
 
     def jump(self):
+        print(self.jumps)
         if self.jumps < 2:
             self.vel.y = -12
             self.jumps += 1
-
-        if self.check_collision():
-            self.jumps = 0
 
     def move(self):
         self.acc = vec(0, 0.5)

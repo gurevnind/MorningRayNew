@@ -14,9 +14,9 @@ class Hero(pygame.sprite.Sprite):
         self.i_x = 180 * self.scale_f
         self.i_y = 104 * self.scale_f
         self.image = player_img
-        self.image = pygame.transform.scale(self.image, (self.i_x, self.i_y))
-        self.rect = self.image.get_rect()
-        self.rect.center = (60, 749)
+        self.image = pygame.transform.scale(self.image, (64, 64))
+        self.rect = pygame.Rect(0, 0, 64, 80)
+        self.rect.topleft = (20, 716 - 210)
         self.d_left = 0
         self.d_right = 0
         self.d_down = 0
@@ -68,12 +68,5 @@ class Hero(pygame.sprite.Sprite):
         if _key == pygame.K_SPACE:
             self.jump = -17
             self.is_moving = False
-
-
-
-
-
-
-player = Hero()
 
 

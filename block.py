@@ -19,10 +19,15 @@ class Floor(pygame.sprite.Sprite):
 
 class Wall(pygame.sprite.Sprite):
     def __int__(self):
+
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((64, 64))
         self.image = pygame.image.load("img\\oblect.JPG")
         self.rect = self.image.get_rect()
+
+
+
+
 
 
 
